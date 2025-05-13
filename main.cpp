@@ -58,10 +58,9 @@ std::vector<everybeam::vector3r_t> sampleNear(
 }
 
 int main() {
-  constexpr int num_stations = 10; //max 31
-  constexpr int num_freqs = 5; // max 900
-  constexpr int num_directions = 150;
-  constexpr int num_times = 3; // max 14
+  constexpr int num_stations = 37;
+  constexpr int num_freqs = 4;
+  constexpr int num_directions = 450;
   using namespace std::chrono;
 
   //Setup
@@ -70,7 +69,7 @@ int main() {
   {
     stations.push_back(i);
   }
-  const casacore::MeasurementSet ms("../measurementsets/TC00_first30.MS");
+  const casacore::MeasurementSet ms("../measurementsets/LOFAR_LBA_MOCK.ms");
 
   everybeam::Options options;
   options.use_channel_frequency = true;
@@ -106,6 +105,8 @@ int main() {
 
   aocommon::BandData band(ms.spectralWindow());
   std::vector<double> freqs;
+  std::cout << "max stations: " << newtelescope->antennas.size() << std::endl;
+  std::cout << "max freqs: " << band.ChannelCount() << std::endl;
   for (int i = 0; i < num_freqs; ++i) {
     freqs.push_back(band.ChannelFrequency(i));
   }
