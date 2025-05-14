@@ -64,6 +64,8 @@ int main() {
   constexpr int num_freqs = 4;
   constexpr int num_directions = 250;
   constexpr int num_benchmarks = 5;
+  const casacore::MeasurementSet ms("../measurementsets/LOFAR_LBA_MOCK.ms");
+
   using namespace std::chrono;
 
   //Setup
@@ -72,7 +74,6 @@ int main() {
   {
     stations.push_back(i);
   }
-  const casacore::MeasurementSet ms("../measurementsets/LOFAR_LBA_MOCK.ms");
 
   everybeam::Options options;
   options.use_channel_frequency = true;
