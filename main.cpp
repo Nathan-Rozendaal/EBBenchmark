@@ -57,10 +57,13 @@ std::vector<everybeam::vector3r_t> sampleNear(
   return out;
 }
 
+
+
 int main() {
   constexpr int num_stations = 37;
   constexpr int num_freqs = 4;
-  constexpr int num_directions = 450;
+  constexpr int num_directions = 250;
+  constexpr int num_benchmarks = 5;
   using namespace std::chrono;
 
   //Setup
@@ -113,17 +116,37 @@ int main() {
 
 
   //Benchmark
-  auto startA = high_resolution_clock::now();
-  ResponseOldTelescope(stations, telescope, directions, time, freqs);
-  auto endA = high_resolution_clock::now();
-  auto durationA = duration_cast<milliseconds >(endA - startA).count();
-  std::cout << "Old response took " << durationA << " milliseconds\n";
+  std::vector<long long> old_durations;
+  std::vector<long long> new_durations;
 
-  auto startB = high_resolution_clock::now();
-  ResponseNewTelescope(stations, newtelescope, directionsXtime, timeXdirections, freqs);
-  auto endB = high_resolution_clock::now();
-  auto durationB = duration_cast<milliseconds >(endB - startB).count();
-  std::cout << "New response took " << durationB << " milliseconds\n";
+  for (int i = 0; i < num_benchmarks; ++i) {
+    auto startA = high_resolution_clock::now();
+    ResponseOldTelescope(stations, telescope, directions, time, freqs);
+    auto endA = high_resolution_clock::now();
+    old_durations.push_back(std::chrono::duration_cast<milliseconds>(endA - startA).count());
+
+    auto startB = high_resolution_clock::now();
+    ResponseNewTelescope(stations, newtelescope, directionsXtime, timeXdirections, freqs);
+    auto endB = high_resolution_clock::now();
+    new_durations.push_back(std::chrono::duration_cast<milliseconds>(endB - startB).count());
+  }
+
+  auto print_stats = [](const std::string& label, const std::vector<long long>& data) {
+    long long total = std::accumulate(data.begin(), data.end(), 0LL);
+    long long min = *std::min_element(data.begin(), data.end());
+    long long max = *std::max_element(data.begin(), data.end());
+    double avg = static_cast<double>(total) / data.size();
+
+    std::cout << label << ":\n"
+              << "  Min: " << min << " ms\n"
+              << "  Max: " << max << " ms\n"
+              << "  Avg: " << avg << " ms\n"
+              << "  Total: " << total << " ms over " << data.size() << " runs\n\n";
+  };
+
+  std::cout << "===== Benchmark Results =====\n";
+  print_stats("Old Response", old_durations);
+  print_stats("New Response", new_durations);
 
   return 0;
 }
